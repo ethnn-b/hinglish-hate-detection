@@ -146,3 +146,42 @@ Decision: stratified train/val/test, fixed seed.
 
 Val is for picking the best checkpoint by macro-F1. Test is held out and scored
 once at the end.
+
+## Pivot: cross-lingual zero-shot transfer
+
+Decision: after the in-language binary comparison came back within noise, pivot
+the headline experiment to cross-lingual zero-shot transfer.
+
+Why. The in-language result (MuRIL 0.8528 vs XLM-R 0.8445 on the Hindi test
+split) is a 0.8-point gap on 598 examples, which is inside the confidence
+interval, so it does not establish a real difference. Error analysis showed why:
+a large share of the errors are label noise (profane posts the annotators marked
+not-hate) and implicit/sarcastic hate that needs world knowledge, neither of
+which MuRIL's transliteration pretraining can fix. And the data is native
+Devanagari, where XLM-R is already competent, so the setting does not test the
+one capability that should separate the models. The comparison was capped by the
+data, not the models.
+
+Transfer fixes both problems. Train on English hate speech, evaluate zero-shot on
+Hindi. Now the question is whether a model can classify a language it was never
+fine-tuned on, which depends directly on what it was pretrained on. An
+English-only model cannot even tokenize Devanagari and falls to near-chance,
+while models with Indian-language pretraining transfer meaningfully. That is a
+large, clean effect with real headroom, and it puts MuRIL's pretraining (the
+actual subject of the project) back at the center.
+
+Model gradient: enbert (`bert-base-cased`, English only), mbert
+(`bert-base-multilingual-cased`, 104 languages), xlmr (100 languages), muril
+(Indian languages plus transliteration). Ordering the results along this gradient
+is the story.
+
+English dataset: Davidson et al. (2017) hate-and-offensive tweets, pulled from
+the Hugging Face hub. Three classes (hate, offensive, neither) mapped to the same
+binary scheme as the Hindi data (hate or offensive -> 1, neither -> 0) so the
+label definitions match and the transfer comparison is fair. Alternatives like
+HASOC English or HatEval would work too; Davidson is large, canonical, and a
+one-line hub download.
+
+The in-language fine-tuned numbers (~0.85) stay useful as the ceiling reference:
+transfer scores are reported as how much of that ceiling each model recovers
+without seeing a single Hindi label.

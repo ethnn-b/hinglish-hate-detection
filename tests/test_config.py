@@ -17,14 +17,27 @@ def test_xlmr_preset_resolves():
     assert Config(preset="xlmr").model_name == "xlm-roberta-base"
 
 
+def test_transfer_presets_resolve():
+    # The cross-lingual gradient: English-only through to India-specific.
+    assert Config(preset="mbert").model_name == "bert-base-multilingual-cased"
+    assert Config(preset="enbert").model_name == "bert-base-cased"
+
+
 def test_unknown_preset_raises():
     with pytest.raises(ValueError):
-        _ = Config(preset="bert").model_name
+        _ = Config(preset="gpt").model_name
 
 
 def test_output_dir_follows_preset():
     cfg = Config(preset="muril", models_dir=Path("models"))
     assert cfg.output_dir == Path("models/muril-best")
+
+
+def test_tag_changes_output_dir():
+    # Used by the transfer study so English-trained checkpoints do not clobber
+    # the in-language ones.
+    cfg = Config(preset="muril", tag="en", models_dir=Path("models"))
+    assert cfg.output_dir == Path("models/muril-en")
 
 
 def test_defaults_match_spec():

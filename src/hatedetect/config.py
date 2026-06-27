@@ -12,9 +12,15 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Map the short preset names used on the command line to Hugging Face model ids.
+# The first two are the headline pair. enbert and mbert are added for the
+# cross-lingual transfer study: they span a pretraining-language gradient from
+# English-only (bert) through 104-language mBERT to the multilingual XLM-R and
+# the India-specific MuRIL.
 PRESETS: dict[str, str] = {
     "muril": "google/muril-base-cased",
     "xlmr": "xlm-roberta-base",
+    "mbert": "bert-base-multilingual-cased",
+    "enbert": "bert-base-cased",
 }
 
 
@@ -48,6 +54,12 @@ class Config:
     # (start plain, see design-decisions.md on imbalance handling).
     class_weights: bool = False
 
+    # A label for the checkpoint dir, so runs do not clobber each other. Default
+    # "best" keeps the original models/<preset>-best path. The transfer study
+    # uses tags like "en" (trained on English) to keep those checkpoints
+    # separate from the in-language ones.
+    tag: str = "best"
+
     # Paths. data_dir holds CSVs, models_dir holds saved checkpoints.
     data_dir: Path = field(default_factory=lambda: Path("data"))
     models_dir: Path = field(default_factory=lambda: Path("models"))
@@ -62,5 +74,5 @@ class Config:
 
     @property
     def output_dir(self) -> Path:
-        """Where this preset's best checkpoint is saved, e.g. models/muril-best."""
-        return self.models_dir / f"{self.preset}-best"
+        """Where this run's checkpoint is saved, e.g. models/muril-best or models/muril-en."""
+        return self.models_dir / f"{self.preset}-{self.tag}"

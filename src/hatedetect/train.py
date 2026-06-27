@@ -16,7 +16,7 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from transformers import get_linear_schedule_with_warmup
 
-from .config import Config
+from .config import PRESETS, Config
 from .data import HateDataset, load_csv, split_data
 from .evaluate import compute_metrics, predict, print_report
 from .model import build_model, build_tokenizer
@@ -125,9 +125,15 @@ def train(cfg: Config, data_path: str) -> dict:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Fine-tune a model on the Hinglish CSV.")
-    parser.add_argument("--preset", choices=["muril", "xlmr"], default="muril")
+    parser = argparse.ArgumentParser(description="Fine-tune a model on a text,label CSV.")
+    parser.add_argument("--preset", choices=list(PRESETS), default="muril")
     parser.add_argument("--data", required=True, help="path to the text,label CSV")
+    parser.add_argument(
+        "--tag",
+        default="best",
+        help="label for the checkpoint dir, e.g. 'en' -> models/<preset>-en. "
+        "Keeps runs on different data from overwriting each other.",
+    )
     parser.add_argument("--max-len", type=int, default=Config.max_len)
     parser.add_argument("--batch-size", type=int, default=Config.batch_size)
     parser.add_argument("--lr", type=float, default=Config.lr)
@@ -142,6 +148,7 @@ def main() -> None:
 
     cfg = Config(
         preset=args.preset,
+        tag=args.tag,
         max_len=args.max_len,
         batch_size=args.batch_size,
         lr=args.lr,
