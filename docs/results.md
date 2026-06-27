@@ -121,6 +121,64 @@ gradient and the floor-to-MuRIL spread are far outside noise. The English data i
 imbalanced (~80% positive); it is identical across all four models, so the
 comparison is fair, but absolute hate recall would shift with class weighting.
 
+## Controlled script comparison (PRISM): does MuRIL's edge depend on script?
+
+Setup: PRISM labels each row english / hindi (Devanagari) / hinglish (Roman
+code-mixed) under one annotation scheme. We fine-tuned MuRIL and XLM-R
+in-language on each subset and scored them on that subset's test split. Holding
+the dataset and labels constant, only the script changes. Hypothesis: MuRIL's
+advantage would be largest on Roman Hinglish (its transliteration home turf).
+
+Result (10 epochs, batch 32, best checkpoint by validation macro-F1):
+
+| script                       | XLM-R  | MuRIL  | MuRIL - XLM-R |
+|------------------------------|--------|--------|---------------|
+| English (Latin)              | 0.8440 | 0.8118 | -0.032        |
+| Hindi (Devanagari)           | 0.6326 | 0.6303 | -0.002        |
+| Hinglish (Roman, code-mixed) | 0.7545 | 0.7335 | -0.021        |
+
+The hypothesis is not supported. The gap is not largest on Hinglish; it is small
+everywhere and slightly favors XLM-R. On Hindi and Hinglish the two are a
+statistical tie: on the Hinglish validation set MuRIL actually beat XLM-R (0.725
+vs 0.701) and then lost on test (0.734 vs 0.755). A ranking that flips between
+validation and test is the signature of a difference within noise (test sets are
+478 to 1499 examples, so confidence intervals are roughly +/- 3 to 4 points).
+XLM-R is modestly better on English, which is unsurprising.
+
+Methodology note (a real catch). A first run at 4 epochs showed MuRIL losing by
+0.18 on Hinglish, which looked like a strong negative result. The per-epoch
+curves showed why it was wrong: MuRIL sat at the predict-majority floor for two
+epochs and was still climbing at epoch 4, while XLM-R had already converged. On
+the small Roman subset (3818 train rows, about 60 steps per epoch at batch 64),
+4 epochs was not enough for the slower-converging model. At 10 epochs both models
+plateaued (MuRIL Hinglish peaked at epoch 6, XLM-R at epoch 7), and the gap
+collapsed from 0.18 to 0.02. The lesson: compare models at convergence, not at a
+fixed epoch budget. PRISM is also a Kaggle compilation, so treat absolute numbers
+with caution; the within-dataset comparison is what matters.
+
+## Synthesis across all three experiments
+
+Three setups now point the same way:
+
+1. In-language HASOC Hindi (Devanagari): MuRIL 0.853 vs XLM-R 0.845. Tie.
+2. In-language PRISM (English, Devanagari, Roman Hinglish): tie on Hindi and
+   Hinglish, XLM-R slightly ahead on English.
+3. Zero-shot cross-lingual transfer (train English, test Hindi): MuRIL 0.597 vs
+   XLM-R 0.541, and a clean monotonic gradient from English-only BERT (0.33) up
+   to MuRIL.
+
+The pattern: when there is in-language supervision, full fine-tuning erases
+MuRIL's pretraining advantage and the two models converge to the same
+performance, regardless of script, including Roman Hinglish. MuRIL's
+India-specific pretraining gives a measurable edge only in the zero-shot regime,
+where the model has no target-language labels and must rely on pretraining alone.
+
+That is the project's real finding, and it is more precise than "MuRIL wins":
+pretraining choice matters most when task supervision is scarce, and washes out
+once you fine-tune on enough in-language data. It also means that for a deployed
+Hinglish classifier with a labelled training set, XLM-R is a perfectly good
+choice; MuRIL earns its keep when you must transfer from another language.
+
 ## What this does not yet cover
 
 - Phase 2: a local open LLM (Llama-3.1-8B / Qwen2.5-7B on the A10G) as a zero-shot

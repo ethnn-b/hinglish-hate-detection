@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 
 from hatedetect.config import Config
 from hatedetect.evaluate import evaluate_checkpoint
@@ -55,6 +56,8 @@ def run(data_dir: str, langs: list[str], base: Config) -> list[dict]:
             train(cfg, data_path)
             metrics = evaluate_checkpoint(str(cfg.output_dir), data_path, cfg)
             scores[preset] = metrics["macro_f1"]
+            # We only need the metrics; drop the checkpoint so disk does not fill.
+            shutil.rmtree(cfg.output_dir, ignore_errors=True)
         rows.append(
             {
                 "lang": lang,
