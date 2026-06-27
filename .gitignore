@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtual env
+.venv/
+venv/
+
+# uv
+.uv/
+
+# Environment / secrets
+.env
+
+# Data and model artifacts (too big for git, regenerate from scripts)
+data/
+models/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Test / coverage
+.pytest_cache/
+.coverage
+htmlcov/

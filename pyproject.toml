@@ -1,0 +1,26 @@
+[project]
+name = "hatedetect"
+version = "0.1.0"
+description = "Hinglish (Hindi-English code-mixed) hate and offensive speech classifier. Fine-tunes MuRIL, compares against an XLM-RoBERTa baseline."
+requires-python = ">=3.11"
+dependencies = [
+    "torch",
+    "transformers",
+    "datasets",
+    "scikit-learn",
+    "pandas",
+    "gradio",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hatedetect"]
