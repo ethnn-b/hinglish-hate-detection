@@ -73,9 +73,29 @@ def _map_label(value: object) -> int:
     raise KeyError(key)
 
 
-def convert(raw_path: str, out_path: str, text_col: str | None, label_col: str | None) -> None:
-    """Read a raw dataset file and write a clean text,label CSV."""
-    df = pd.read_csv(raw_path)
+def _read_raw(path: str, sep: str | None) -> pd.DataFrame:
+    """Read one raw file. Separator defaults to tab for .tsv, comma otherwise."""
+    if sep is None:
+        sep = "\t" if path.lower().endswith((".tsv", ".tab")) else ","
+    return pd.read_csv(path, sep=sep)
+
+
+def convert(
+    raw_paths: list[str],
+    out_path: str,
+    text_col: str | None,
+    label_col: str | None,
+    sep: str | None,
+) -> None:
+    """Read one or more raw dataset files and write a single text,label CSV.
+
+    Multiple files are concatenated into one pool. The training pipeline does
+    its own stratified split, so pooling e.g. a train and a gold-test TSV here
+    just gives the splitter more data to work with.
+    """
+    frames = [_read_raw(p, sep) for p in raw_paths]
+    df = pd.concat(frames, ignore_index=True)
+    print(f"read {len(df)} rows from {len(raw_paths)} file(s)")
 
     text_col = text_col or _pick_column(df, TEXT_COLUMNS, "text")
     label_col = label_col or _pick_column(df, LABEL_COLUMNS, "label")
@@ -113,17 +133,22 @@ def convert(raw_path: str, out_path: str, text_col: str | None, label_col: str |
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--links", action="store_true", help="print dataset download links and exit")
-    parser.add_argument("--raw", help="path to a raw downloaded dataset file (CSV)")
+    parser.add_argument(
+        "--raw",
+        action="append",
+        help="path to a raw downloaded dataset file (CSV/TSV). Repeat to pool several.",
+    )
     parser.add_argument("--out", default="data/hinglish.csv", help="output CSV path")
     parser.add_argument("--text-col", help="override the text column name")
     parser.add_argument("--label-col", help="override the label column name")
+    parser.add_argument("--sep", help="column separator (default: tab for .tsv, comma otherwise)")
     args = parser.parse_args()
 
     if args.links or not args.raw:
         print_links()
         return
 
-    convert(args.raw, args.out, args.text_col, args.label_col)
+    convert(args.raw, args.out, args.text_col, args.label_col, args.sep)
 
 
 if __name__ == "__main__":
