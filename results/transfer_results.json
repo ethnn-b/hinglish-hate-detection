@@ -1,0 +1,6 @@
+[
+  {"preset": "enbert", "pretraining": "English only", "transfer_macro_f1": 0.3309494559494559, "transfer_accuracy": 0.4882943143812709, "transfer_hate_recall": 0.003257328990228013},
+  {"preset": "mbert", "pretraining": "104 languages", "transfer_macro_f1": 0.36428367579908677, "transfer_accuracy": 0.5016722408026756, "transfer_hate_recall": 0.035830618892508145},
+  {"preset": "xlmr", "pretraining": "100 languages", "transfer_macro_f1": 0.5409128990230088, "transfer_accuracy": 0.596989966555184, "transfer_hate_recall": 0.24104234527687296},
+  {"preset": "muril", "pretraining": "Indian languages + transliteration", "transfer_macro_f1": 0.5967000737150834, "transfer_accuracy": 0.6404682274247492, "transfer_hate_recall": 0.30293159609120524}
+]

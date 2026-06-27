@@ -1,0 +1,5 @@
+[
+  {"lang": "english", "script": "English (Latin)", "xlmr_macro_f1": 0.8301339667865091, "muril_macro_f1": 0.8193332530370013, "muril_minus_xlmr": -0.010800713749507751},
+  {"lang": "hindi", "script": "Hindi (Devanagari)", "xlmr_macro_f1": 0.6334720374099752, "muril_macro_f1": 0.5999751218973414, "muril_minus_xlmr": -0.033496915512633785},
+  {"lang": "hinglish", "script": "Hinglish (Roman, code-mixed)", "xlmr_macro_f1": 0.6925562789238371, "muril_macro_f1": 0.5123309066176285, "muril_minus_xlmr": -0.1802253723062086}
+]
