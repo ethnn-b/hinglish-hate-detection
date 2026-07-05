@@ -205,6 +205,30 @@ once you fine-tune on enough in-language data. It also means that for a deployed
 Hinglish classifier with a labelled training set, XLM-R is a perfectly good
 choice; MuRIL earns its keep when you must transfer from another language.
 
+## Gradio demo
+
+The app runs with `uv run python -m hatedetect.app` (or `space/app.py` for
+Hugging Face Spaces). It takes a single text input, runs the MuRIL checkpoint,
+and shows the predicted label plus per-class probabilities as a bar chart.
+
+**Hate / offensive (81% confidence)**
+
+Input: "people like you are a disease, you should not be allowed to exist here"
+
+![hate/offensive prediction](assets/demo-hate.png)
+
+**Not hate (85% confidence)**
+
+Input: "Bhai tune kamaal kar diya, bahut badhiya kaam"
+
+![not hate prediction](assets/demo-not-hate.png)
+
+The model catches the plain-English dehumanizing framing at 81% and correctly
+reads the positive Roman-script Hinglish at 85% not-hate. Neither prediction
+crosses 0.9, which matches the error analysis finding that all errors sit just
+over the 0.5 boundary: the model hedges on genuinely ambiguous examples rather
+than making high-confidence mistakes.
+
 ## What this does not yet cover
 
 - Phase 2: a local open LLM (Llama-3.1-8B / Qwen2.5-7B on the A10G) as a zero-shot
