@@ -1,0 +1,8 @@
+# Gradio itself is installed by the Space runtime from the sdk_version in
+# README.md, so it is not listed here. These are the libraries the vendored
+# hatedetect package imports on the inference path.
+transformers>=5,<6
+torch
+sentencepiece
+scikit-learn
+pandas
