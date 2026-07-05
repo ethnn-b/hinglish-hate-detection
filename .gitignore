@@ -32,3 +32,6 @@ models/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Local tracking only
+STATUS.md
