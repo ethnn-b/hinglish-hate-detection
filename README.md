@@ -98,6 +98,15 @@ For a deployed Hinglish classifier with a labelled training set, XLM-RoBERTa is
 a perfectly good choice. MuRIL earns its keep when you must transfer from another
 language.
 
+## Demo
+
+The Gradio app (`uv run python -m hatedetect.app`) takes a text input and returns
+the predicted label with per-class probabilities.
+
+![hate/offensive prediction](docs/assets/demo-hate.png)
+
+![not hate prediction](docs/assets/demo-not-hate.png)
+
 ## Datasets
 
 - HASOC 2019 Hindi (hasocfire.github.io): 5980 examples after normalization,
