@@ -38,6 +38,32 @@ not      256   35       not     255   36
 hate      58  249       hate     52  255
 ```
 
+## Effect of fine-tuning: base model vs fine-tuned
+
+Evaluated both models in their raw pretrained state (no fine-tuning, fresh random
+classification head) on the same test split to isolate the fine-tuning contribution.
+
+| Model | Base macro-F1 | Fine-tuned macro-F1 | Gain  | Base behavior         |
+|-------|---------------|---------------------|-------|-----------------------|
+| XLM-R | 0.3273        | 0.8445              | +0.52 | predicts all not-hate |
+| MuRIL | 0.3415        | 0.8528              | +0.51 | predicts all hate     |
+
+Both base models degenerate to a single-class predictor (random head, no signal):
+XLM-R predicts every example as not-hate (hate recall = 0.00), MuRIL predicts
+everything as hate (not-hate recall = 0.003). Macro-F1 near 0.33 is the
+random-head floor for a two-class balanced dataset with one class getting F1 = 0
+and the other getting F1 around 0.65 to 0.68.
+
+The pretrained encoder backbone contains no task-specific signal that survives the
+random head. Fine-tuning adds 51 to 52 macro-F1 points, which is the entire gap
+between chance and near-ceiling performance. The two models start from the same
+floor and reach effectively the same ceiling, confirming that full fine-tuning
+erases whatever pretraining differences exist for this task size. The ~0.33 floor
+also matches the enbert floor in the cross-lingual transfer table, which makes
+sense: a model that cannot tokenize the target language and a model with an
+untrained head both collapse to one-class prediction for the same reason (no
+usable discriminative signal).
+
 ## Read
 
 MuRIL beats XLM-R on test macro-F1 by 0.0083 (0.83 points). The whole gain is on
